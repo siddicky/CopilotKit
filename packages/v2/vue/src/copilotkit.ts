@@ -43,6 +43,9 @@ export interface CopilotKitInstance {
   /** Register a human-in-the-loop tool. */
   addHumanInTheLoop(config: HumanInTheLoopConfig): void;
 
+  /** Map of pending human-in-the-loop respond callbacks, keyed by tool name. */
+  readonly pendingHitlResponders: Map<string, (result: unknown) => void>;
+
   /** Remove a tool by name and optional agent ID. */
   removeTool(name: string, agentId?: string): void;
 
@@ -66,6 +69,8 @@ function createCopilotKitInstance(config: CopilotKitConfig): CopilotKitInstance 
     agents__unsafe_dev_only: config.agents,
     tools: config.tools,
   });
+
+  const pendingHitlResponders = new Map<string, (result: unknown) => void>();
 
   const state = reactive({
     toolCallRenderConfigs: [] as RenderToolCallConfig[],
@@ -108,15 +113,23 @@ function createCopilotKitInstance(config: CopilotKitConfig): CopilotKitInstance 
     get agents() {
       return state.agents;
     },
+    get pendingHitlResponders() {
+      return pendingHitlResponders;
+    },
 
     addRenderToolCall(renderConfig: RenderToolCallConfig): void {
+      core.addTool({
+        name: renderConfig.name,
+        description: `Render tool call: ${renderConfig.name}`,
+        parameters: renderConfig.args,
+        agentId: renderConfig.agentId,
+        handler: async () => undefined,
+      });
       state.toolCallRenderConfigs.push(renderConfig);
     },
 
     addFrontendTool(toolConfig: FrontendToolConfig): void {
-      core.addTool({
-        ...toolConfig,
-      });
+      core.addTool(toolConfig);
       state.frontendToolConfigs.push(toolConfig);
     },
 
@@ -127,11 +140,11 @@ function createCopilotKitInstance(config: CopilotKitConfig): CopilotKitInstance 
         parameters: hitlConfig.parameters,
         agentId: hitlConfig.agentId,
         handler: async () => {
-          return new Promise((resolve) => {
-            console.warn(
-              `Human-in-the-loop tool '${hitlConfig.name}' called but no interactive handler is set up.`,
-            );
-            resolve(undefined);
+          return new Promise<unknown>((resolve) => {
+            pendingHitlResponders.set(hitlConfig.name, (result) => {
+              pendingHitlResponders.delete(hitlConfig.name);
+              resolve(result);
+            });
           });
         },
       });
