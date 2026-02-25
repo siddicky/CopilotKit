@@ -118,13 +118,8 @@ function createCopilotKitInstance(config: CopilotKitConfig): CopilotKitInstance 
     },
 
     addRenderToolCall(renderConfig: RenderToolCallConfig): void {
-      core.addTool({
-        name: renderConfig.name,
-        description: `Render tool call: ${renderConfig.name}`,
-        parameters: renderConfig.args,
-        agentId: renderConfig.agentId,
-        handler: async () => undefined,
-      });
+      // Render tools are UI-only and should not be registered with the core runtime.
+      // They are tracked locally for rendering purposes only.
       state.toolCallRenderConfigs.push(renderConfig);
     },
 
