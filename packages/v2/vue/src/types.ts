@@ -1,6 +1,6 @@
 import type { AbstractAgent } from "@ag-ui/client";
 import type { FrontendTool, FrontendToolHandlerContext } from "@copilotkitnext/core";
-import type { Component, Ref } from "vue";
+import type { Component } from "vue";
 import type { z } from "zod";
 
 /**

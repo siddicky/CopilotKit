@@ -56,6 +56,9 @@ export function useAgent(options: UseAgentOptions = {}): {
       return;
     }
 
+    // Skip re-initialization if the agent reference hasn't changed
+    if (agentStore.value?.agent === agent) return;
+
     const isRunning = ref(false);
     const messages = ref<Message[]>([...agent.messages]);
     const state = ref<unknown>(agent.state);
@@ -93,13 +96,13 @@ export function useAgent(options: UseAgentOptions = {}): {
     return agentIdOption.value ?? DEFAULT_AGENT_ID;
   };
 
-  // Watch for agent changes in the registry
+  // Watch for the specific agent in the registry rather than deep-watching all agents
   watch(
-    () => copilotkit.agents,
+    () => copilotkit.agents[getAgentId()],
     () => {
       resolveAgent(getAgentId());
     },
-    { deep: true, immediate: true },
+    { immediate: true },
   );
 
   // Watch for agentId ref changes
