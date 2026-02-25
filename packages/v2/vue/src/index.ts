@@ -10,3 +10,12 @@ export * from "./use-frontend-tool";
 export * from "./use-render-tool-call";
 export * from "./use-human-in-the-loop";
 export * from "./use-agent-context";
+export * from "./use-configure-suggestions";
+export * from "./use-suggestions";
+
+// Vue-specific types
+export * from "./types/index";
+
+// Vue-specific core and utilities
+export * from "./lib/vue-core";
+export * from "./lib/render-utils";

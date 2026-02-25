@@ -43,7 +43,7 @@ export interface CopilotKitInstance {
   /** Register a human-in-the-loop tool. */
   addHumanInTheLoop(config: HumanInTheLoopConfig): void;
 
-  /** Map of pending human-in-the-loop respond callbacks, keyed by tool name. */
+  /** Map of pending human-in-the-loop respond callbacks, keyed by toolCall.id. */
   readonly pendingHitlResponders: Map<string, (result: unknown) => void>;
 
   /** Remove a tool by name and optional agent ID. */
@@ -134,10 +134,10 @@ function createCopilotKitInstance(config: CopilotKitConfig): CopilotKitInstance 
         description: hitlConfig.description,
         parameters: hitlConfig.parameters,
         agentId: hitlConfig.agentId,
-        handler: async () => {
+        handler: async (_args, { toolCall }) => {
           return new Promise<unknown>((resolve) => {
-            pendingHitlResponders.set(hitlConfig.name, (result) => {
-              pendingHitlResponders.delete(hitlConfig.name);
+            pendingHitlResponders.set(toolCall.id, (result) => {
+              pendingHitlResponders.delete(toolCall.id);
               resolve(result);
             });
           });
