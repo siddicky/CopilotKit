@@ -1,0 +1,8 @@
+src/
+vitest.config.mts
+tsconfig.json
+tsdown.config.ts
+eslint.config.mjs
+**/__tests__/
+**/*.spec.ts
+**/*.test.ts
