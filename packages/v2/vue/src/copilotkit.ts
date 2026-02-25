@@ -222,8 +222,8 @@ function createCopilotKitInstance(config: CopilotKitConfig): CopilotKitInstance 
  * app.use(CopilotKitPlugin, { runtimeUrl: '/api/copilotkit' });
  * ```
  */
-export const CopilotKitPlugin: Plugin<[CopilotKitConfig]> = {
-  install(app, config) {
+export const CopilotKitPlugin: Plugin<[CopilotKitConfig?]> = {
+  install(app, config = {}) {
     const instance = createCopilotKitInstance(config);
     app.provide(CopilotKitKey, instance);
   },

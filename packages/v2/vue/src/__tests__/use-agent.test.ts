@@ -160,6 +160,48 @@ describe("useAgent", () => {
     expect(store?.value?.isRunning.value).toBe(false);
   });
 
+  it("keeps subscription alive when resolveAgent is called for same agent instance", async () => {
+    const agent = new MockAgent("test-agent");
+    coreAgents = { "test-agent": agent };
+    mockGetAgent.mockImplementation((id: string) =>
+      id === "test-agent" ? agent : undefined,
+    );
+
+    let store: Ref<AgentStore | undefined> | undefined;
+
+    const Comp = defineComponent({
+      setup() {
+        const result = useAgent({ agentId: "test-agent" });
+        store = result.agentStore;
+        return () => h("div");
+      },
+    });
+
+    mount(Comp, {
+      global: {
+        plugins: [
+          [CopilotKitPlugin, { agents: { "test-agent": agent as any } }],
+        ],
+      },
+    });
+
+    await nextTick();
+
+    expect(store?.value).toBeDefined();
+    expect(agent.unsubscribeCount).toBe(0);
+
+    // Trigger the agents watcher again (same agent instance)
+    // This simulates the watch firing a second time for the same agent
+    agent.emitMessages([{ content: "before" }]);
+    expect(store?.value?.messages.value).toEqual([{ content: "before" }]);
+
+    // The subscription should still be active after re-resolve with same agent
+    // (the early-return check should prevent unsubscribe)
+    agent.emitMessages([{ content: "after" }]);
+    expect(store?.value?.messages.value).toEqual([{ content: "after" }]);
+    expect(agent.unsubscribeCount).toBe(0);
+  });
+
   it("returns undefined when agent is not found", async () => {
     coreAgents = {};
     mockGetAgent.mockReturnValue(undefined);

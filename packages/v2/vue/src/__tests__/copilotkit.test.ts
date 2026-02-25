@@ -85,6 +85,28 @@ describe("CopilotKitPlugin", () => {
     expect(lastCoreConfig.runtimeUrl).toBe("https://runtime.local");
   });
 
+  it("installs without options (config defaults to {})", () => {
+    let captured: CopilotKitInstance | undefined;
+
+    const Child = defineComponent({
+      setup() {
+        captured = useCopilotKit();
+        return () => h("div");
+      },
+    });
+
+    // app.use(CopilotKitPlugin) without a second argument
+    mount(Child, {
+      global: {
+        plugins: [CopilotKitPlugin],
+      },
+    });
+
+    expect(captured).toBeDefined();
+    expect(lastCoreConfig).toBeDefined();
+    expect(lastCoreConfig.runtimeUrl).toBeUndefined();
+  });
+
   it("initialises core with provided config", () => {
     const tools = [
       {

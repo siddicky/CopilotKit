@@ -44,20 +44,28 @@ export function useAgent(options: UseAgentOptions = {}): {
   let currentSubscription: { unsubscribe: () => void } | undefined;
 
   function resolveAgent(agentId: string): void {
-    // Cleanup previous subscription
-    if (currentSubscription) {
-      currentSubscription.unsubscribe();
-      currentSubscription = undefined;
-    }
-
     const agent = copilotkit.getAgent(agentId);
+
     if (!agent) {
+      // Agent no longer exists; clean up any existing subscription and store.
+      if (currentSubscription) {
+        currentSubscription.unsubscribe();
+        currentSubscription = undefined;
+      }
       agentStore.value = undefined;
       return;
     }
 
-    // Skip re-initialization if the agent reference hasn't changed
-    if (agentStore.value?.agent === agent) return;
+    // Skip re-initialization if the agent reference hasn't changed.
+    if (agentStore.value?.agent === agent) {
+      return;
+    }
+
+    // Agent instance changed; clean up previous subscription before subscribing to the new one.
+    if (currentSubscription) {
+      currentSubscription.unsubscribe();
+      currentSubscription = undefined;
+    }
 
     const isRunning = ref(false);
     const messages = ref<Message[]>([...agent.messages]);
