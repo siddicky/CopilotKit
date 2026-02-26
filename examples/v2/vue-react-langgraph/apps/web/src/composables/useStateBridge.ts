@@ -16,7 +16,7 @@ import type {
 export function useStateBridge() {
   const agentState = reactive<AgentState>({
     proverbs: [
-      "CopilotKit may be new, but its the best thing since sliced bread.",
+      "CopilotKit may be new, but it's the best thing since sliced bread.",
     ],
   });
 

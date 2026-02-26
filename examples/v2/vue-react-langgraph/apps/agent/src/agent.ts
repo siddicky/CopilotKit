@@ -72,40 +72,40 @@ const deleteProverb = tool(
 // 5. Put our tools into an array
 const tools = [getWeather, deleteProverb];
 
-// 5. Define the chat node, which will handle the chat logic
+// 6. Define the chat node, which will handle the chat logic
 async function chat_node(state: AgentState, config: RunnableConfig) {
-  // 5.1 Define the model, lower temperature for deterministic responses
+  // 6.1 Define the model, lower temperature for deterministic responses
   const model = new ChatOpenAI({ model: "gpt-4o-mini" });
 
-  // 5.2 Bind the tools to the model, include CopilotKit actions. This allows
+  // 6.2 Bind the tools to the model, include CopilotKit actions. This allows
   //     the model to call tools that are defined in CopilotKit by the frontend.
   const modelWithTools = model.bindTools!([
     ...convertActionsToDynamicStructuredTools(state.copilotkit?.actions ?? []),
     ...tools,
   ]);
 
-  // 5.3 Define the system message, which will be used to guide the model, in this case
+  // 6.3 Define the system message, which will be used to guide the model, in this case
   //     we also add in the language to use from the state.
   const systemMessage = new SystemMessage({
     content: `You are a helpful assistant. The current proverbs are ${JSON.stringify(state.proverbs)}. If a user asks to delete a proverb, call deleteProverb to trigger a human-in-the-loop interrupt for confirmation.`,
   });
 
-  // 5.4 Invoke the model with the system message and the messages in the state
+  // 6.4 Invoke the model with the system message and the messages in the state
   const response = await modelWithTools.invoke(
     [systemMessage, ...state.messages],
     config,
   );
 
-  // 5.5 Return the response, which will be added to the state
+  // 6.5 Return the response, which will be added to the state
   return {
     messages: response,
   };
 }
 
-// 6. Define the function that determines whether to continue or not,
+// 7. Define the function that determines whether to continue or not,
 //    this is used to determine the next node to run
 function shouldContinue({ messages, copilotkit }: AgentState) {
-  // 6.1 Get the last message from the state
+  // 7.1 Get the last message from the state
   const lastMessage = messages[messages.length - 1] as AIMessage;
 
   // 7.2 If the LLM makes a tool call, then we route to the "tools" node
@@ -120,7 +120,7 @@ function shouldContinue({ messages, copilotkit }: AgentState) {
     }
   }
 
-  // 6.4 Otherwise, we stop (reply to the user) using the special "__end__" node
+  // 7.4 Otherwise, we stop (reply to the user) using the special "__end__" node
   return "__end__";
 }
 

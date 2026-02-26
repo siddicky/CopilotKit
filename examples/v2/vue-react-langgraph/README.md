@@ -36,7 +36,9 @@ Vue and React share state through a callback bridge:
 
 ## Setup
 
-1. Install dependencies from the monorepo root:
+All commands below should be run from this example's root directory (`examples/v2/vue-react-langgraph/`).
+
+1. Install dependencies:
    ```bash
    pnpm install
    ```
@@ -51,19 +53,19 @@ Vue and React share state through a callback bridge:
    **Terminal 1 — LangGraph Agent:**
    ```bash
    cd apps/agent
-   npx @langchain/langgraph-cli dev --port 8125 --no-browser
+   pnpm dev
    ```
 
    **Terminal 2 — CopilotKit Runtime:**
    ```bash
    cd apps/runtime
-   npx tsx src/index.ts
+   pnpm dev
    ```
 
    **Terminal 3 — Vue App:**
    ```bash
    cd apps/web
-   npx vite
+   pnpm dev
    ```
 
 4. Open http://localhost:5173
